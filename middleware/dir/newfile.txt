@@ -1,0 +1,8 @@
+03496cf7-9f11-4e68-96df-5144c9ae17d6	2025 Jan 30	23:58:52	GET	Unknown Origin	/
+8adb7310-9ef7-4cdd-827b-cf6c11fe2223	2025 Jan 30	23:58:52	GET	Unknown Origin	/css/style.css
+c76501cd-835c-4a11-a4c7-abec644dd482	2025 Jan 30	23:58:52	GET	Unknown Origin	/image/imag3.jpg
+cd8fd678-2dca-43a2-831d-7d8b0bc3e4e8	2025 Jan 30	23:58:54	GET	Unknown Origin	/favicon.ico
+70c6fa64-d669-41a0-a832-3e74507a8c48	2025 Jan 31	08:39:33	GET	Unknown Origin	/
+173f8f42-277c-4e17-b096-d82df69b01a1	2025 Jan 31	08:39:34	GET	Unknown Origin	/css/style.css
+3e2ae039-50ca-4531-b7d7-6fd7d57097cc	2025 Jan 31	08:39:34	GET	Unknown Origin	/image/imag3.jpg
+28349b93-ca71-409a-9ece-d0c79f95acce	2025 Jan 31	08:39:35	GET	Unknown Origin	/favicon.ico

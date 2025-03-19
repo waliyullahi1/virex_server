@@ -6,15 +6,19 @@ const FoundSchema = new Schema({
     type: String,
     required: true
     },
-    dateShow:{
-      type: String,
-      required: true
-      },
-  customerId:{
+  tx_ref: {
     type: String,
     required: true
   },
-  transactionId: {
+  full_name: {
+    type: String,
+    required: true
+  },
+  phone_number: {
+    type: String,
+    required: true
+  },
+  payment_type:{
     type: String,
     required: true
   },
@@ -24,14 +28,19 @@ const FoundSchema = new Schema({
     required: true
   },
 
-  timestamp:{
+  status:{
     type: String,
     required: true
   },
 
-  status:{
+  currency:{
     type: String,
     required: true
+  },
+ trans_account_number: {
+    type: String,
+    default: undefined,
+    
   },
 
 });

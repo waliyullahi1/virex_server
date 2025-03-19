@@ -28,10 +28,10 @@ app.use(logger);
 
 const corsOptions = {
 
-  origin: ['http://localhost:5173','http://localhost:3001','https://www.abaniseedu.com', 'http://localhost:3000'],
+  origin: ['http://localhost:3000','https://virex-lemon.vercel.app',],
   credentials: true,
   // optionsSuccessStatus:40
-
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
 
@@ -57,10 +57,10 @@ app.use("/logout", require("./route/api/logout"));
 app.use("/refresh", require("./route/refreshToken"));
 app.use("/dashbord", require("./route/dashbord"));
 app.use("/transaction", require("./route/transaction"));
+app.use("/fund", require("./route/api/fund"));
 app.use("/resetpassword", require("./route/resetpassword"));
 app.use("/veryfyJWT", require("./middleware/verifyJWT"));
 app.use("/valid", require("./controllers/verify"));
-// app.use("/dd", require("./controllers/test"));
 app.use("/getRates", require("./route/sms"));
 
 

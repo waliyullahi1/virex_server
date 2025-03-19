@@ -32,7 +32,7 @@ const handleNewUsers = async (req, res) => {
       password: hashedPwd,
     }); 
 
-    console.log(result)
+    
     
 
     

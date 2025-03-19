@@ -1,6 +1,6 @@
 
 const nodemailer = require('nodemailer');
-const User = require('../model/Users');
+const Virexscheme = require('../model/Users');
 const jwt = require('jsonwebtoken');
 
 const bcrypt = require('bcryptjs');
@@ -12,7 +12,7 @@ const bcrypt = require('bcryptjs');
 const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
-    const foundUser = await User.findOne({ email }).exec();
+    const foundUser = await Virexscheme.findOne({ email }).exec();
 
     if (!foundUser) {
       return res.status(400).json({ message: "Email does not exist" });
@@ -33,14 +33,14 @@ const requestPasswordReset = async (req, res) => {
       service: 'gmail',
       auth: {
         user: 'waliuwaheed2021@gmail.com',
-        pass: 'onxr sqvu qtwa eblk'
+        pass: 'nadu irwy irbr zmqt'
       }
     });
 
     let mailOptions = {
-      from: '"Abaniseedu" <waliuwaheed2021@gmail.com>',
+      from: '"Virex" <waliuwaheed2021@gmail.com>',
       to: email,
-      subject: 'Forget Password - Abaniseedu.com',
+      subject: 'Forget Password - Virex.com',
       text: `Dear ${foundUser.email},\nYour new password: ${randomPassword}\nThanks`,
     };
     
@@ -64,31 +64,46 @@ const resetPassword = async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(402);
   const refreshToken = cookies.jwt;
-
-  const foundUser = await User.findOne({ refreshToken }).exec();
+  
+  const foundUser = await Virexscheme.findOne({ refreshToken }).exec();
 
   if (!foundUser) return res.sendStatus(403);
 
-  const { currentpassword, newPassword } = req.body;
-
-
+  const { full_name, currentpassword, newPassword } = req.body;
+  console.log(full_name);
+  
+if(currentpassword) {
+  if(!newPassword) return res.status(400).json({ message: "An error as occur" });
   if (foundUser) {
     const isOldPasswordCorrect = await bcrypt.compare(currentpassword, foundUser.password);
-    if (!isOldPasswordCorrect) return res.status(401).json({ message: "Incorrect old password" });
+    if (!isOldPasswordCorrect) return res.status(401).json({ message: "Incorrect current password " });
 
     const hashedPwd = await bcrypt.hash(newPassword, 10);
     foundUser.password = hashedPwd
-
+    foundUser.full_name = full_name
 
     await foundUser.save()
-    console.log(foundUser.password)
+    
     return res.json({ success: "passwords reset sucesssful" })
   } else {
     return res
       .status(400)
       .json({ message: "usermane and password are require" });
   }
+}
+if(full_name) {
+  foundUser.full_name = full_name;
+await foundUser.save();
+
+return res
+.status(200)
+.json({ message: "Your profile update successfully" });
 };
+
+return res.status(200).json({ message: "nothing update" });
+
+}
+
 
 const resetTransactionCode = async (req, res) => {
   try {

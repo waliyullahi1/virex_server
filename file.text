@@ -1,1 +1,6 @@
- ssh -R wizzywise:80:localhost:3500 serveo.neta
+ssh -R wizzye:80:localhost:3500 serveo.net
+ssh -R wizzye:80:localhost:3500 serveo.net
+cloudflared-windows-amd64.exe tunnel --url http://localhost:3500
+
+FLW_PUBLIC_KEY = FLWPUBK-149d7213dd03cd7c17b5dbd06c41acb6-X
+FLW_SECRET_KEY= FLWSECK-59276ab5d8cbd8fb946eaef39dfb946c-195cc71f8dfvt-X

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const FoundSchema = new Schema({
+const FundSchema = new Schema({
   email: {
     type: String,
     required: true
@@ -10,34 +10,38 @@ const FoundSchema = new Schema({
     type: String,
     required: true
   },
-  full_name: {
-    type: String,
-    required: true
-  },
-  phone_number: {
-    type: String,
-    required: true
-  },
+  transaction_id:String,
+   
+ 
+
   payment_type:{
     type: String,
     required: true
   },
-
+  bank_name: String,
+ 
+  time_created:{
+    type: String,
+    required: true
+  },
+ 
   amount:{
     type: Number,
     required: true
   },
-
+  account_expiration:{
+    type: Date,
+  },
+  account_expiration_show:{
+    type: String,
+  },
   status:{
     type: String,
     required: true
   },
 
-  currency:{
-    type: String,
-    required: true
-  },
- trans_account_number: {
+
+  transfer_account: {
     type: String,
     default: undefined,
     
@@ -45,4 +49,4 @@ const FoundSchema = new Schema({
 
 });
 
-module.exports = mongoose.model('Found', FoundSchema );
+module.exports = mongoose.model('Fund', FundSchema );

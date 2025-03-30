@@ -10,7 +10,7 @@ const smsSaves = async (  email, PhoneNumber, amount, country, app) =>{
      const sms_Token = jwt.sign(
        { UserInfo: { phone: PhoneNumber, email:email } },
        process.env.ACCESS_TOKEN_SECRETY,
-       { expiresIn: "20m" }
+       { expiresIn: "50m" }
      );
    
    

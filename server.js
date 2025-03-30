@@ -66,10 +66,6 @@ app.use("/getRates", require("./route/sms"));
 
 
 
-
-// app.use(verifyJWT);
-
-
 app.get(
   "/red(.html)?",
   (req, res, next) => {

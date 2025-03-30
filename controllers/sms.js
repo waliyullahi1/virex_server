@@ -27,7 +27,7 @@ const generateNumber = async (req, res) => {
 
 
   const foundUser = await User.findOne({ refreshToken }).exec();
-
+if(foundUser) {
   const { country, app } = req.body;
   if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
 
@@ -84,6 +84,8 @@ const generateNumber = async (req, res) => {
     console.error(error);
     return res.status(500).json({ message: "An unexpected error occurred." });
   }
+}
+ 
 };
 
 const showNumber = async (req, res) => {
@@ -103,6 +105,7 @@ const showNumber = async (req, res) => {
 
 
 const otp = async (req, res) => {
+
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);
 
@@ -113,11 +116,19 @@ const otp = async (req, res) => {
   const { country, app, phoneNumber } = req.body;
 
   const number_found = await smsSave.findOne({ Phone_Number: phoneNumber }).exec();
+  console.log(number_found);
+  
   if (!number_found) return res.status(404).json({ message: "Phone number not found" });
-  if (!number_found.token == 'expired') return res.status(404).json({ message: "Phone number is expired" });
+  if (number_found.token == ''){
+    number_found.status == 'expired';
+    await foundUser.save();
+    console.log('fffff')
+    return res.status(404).json({ message: "Phone number is expired" });
+  } 
+
   try {
     const decoded = jwt.verify(number_found.token, process.env.ACCESS_TOKEN_SECRETY);
-    
+      console.log(decoded);
     if (number_found.email !== decoded.UserInfo.email) {
       console.log("Email in token does not match user record");
       return res.status(403).json({ message: "Invalid email" });
@@ -185,6 +196,8 @@ const otp = async (req, res) => {
       return res.status(403).json({ message: "Token expired" });
     } else {
       console.log("Error verifying token:", err.message);
+      number_found.status = 'expired';
+      await number_found.save();
       return res.status(403).json({ message: "Invalid token" });
     }
   }

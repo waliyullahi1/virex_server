@@ -9,7 +9,7 @@ const fundHistory = async (req, res)=>{
     const refreshToken = cookies.jwt;
     const foundUser = await User.findOne({ refreshToken }).exec();
     const email = foundUser.email;
-    console.log(email);
+    
     
     const fund = await Found.find({ email:email }) 
     res.json(fund)

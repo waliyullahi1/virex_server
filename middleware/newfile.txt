@@ -27139,3 +27139,6 @@ f51bf2a6-b3fd-48f4-9ed2-85eeffb0c609	 2025 Mar 031	012:16:25 	GET	 http://localh
 7a83c338-7757-4f99-b947-d0607d8fffa1	 2025 Mar 031	012:16:26 	GET	 http://localhost:3000	 /getRates
 eb9e3b2b-173b-43ec-8ffe-6c38e2267887	 2025 Mar 031	013:19:48 	OPTIONS	 http://localhost:3000	 /refresh
 2f0e4c45-d326-4d74-b266-54f6dae1d65d	 2025 Mar 031	013:19:48 	GET	 http://localhost:3000	 /refresh
+c776dc6c-2332-499b-b553-b8815e032cf7	 2025 Mar 031	013:53:47 	GET	 http://localhost:3000	 /dashbord
+4ed01c56-3186-4969-904e-13cbb8b9d595	 2025 Mar 031	013:53:47 	GET	 http://localhost:3000	 /fund/history
+2443bca1-96f5-49fe-a7e7-109209ab40a1	 2025 Mar 031	013:54:55 	GET	 http://localhost:3000	 /getRates/apps/UK

@@ -117,15 +117,17 @@ const otp = async (req, res) => {
 
   const number_found = await smsSave.findOne({ Phone_Number: phoneNumber }).exec();
   console.log(number_found);
-  
+  console.log( 'Active', number_found.Activation_Code, `Status`,  number_found.status)
   if (!number_found) return res.status(404).json({ message: "Phone number not found" });
-  if (number_found.token == ''){
+  if (number_found.token == ''|| number_found.status == 'active'&& number_found.Activation_Code){
     number_found.status == 'expired';
+    
     await foundUser.save();
     console.log('fffff')
     return res.status(404).json({ message: "Phone number is expired" });
   } 
 
+  console.log( 'Active2', number_found.Activation_Code, `Status2`,  number_found.status)
   try {
     const decoded = jwt.verify(number_found.token, process.env.ACCESS_TOKEN_SECRETY);
       console.log(decoded);
@@ -133,6 +135,7 @@ const otp = async (req, res) => {
       console.log("Email in token does not match user record");
       return res.status(403).json({ message: "Invalid email" });
     }
+    
 
     console.log("Token is valid, proceeding to next middleware...");
 
@@ -157,7 +160,8 @@ const otp = async (req, res) => {
 
       if (errors.includes(response.data)) {
         console.log(response.data);
-        
+          console.log('waliuu');
+          
         return res.status(400).json({ message: response.data });
       }
      

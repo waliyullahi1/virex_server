@@ -4,6 +4,7 @@ const axios = require('axios')
 const smsSaves = require('./savesms')
 
 const jwt = require("jsonwebtoken");
+const e = require("express");
 
 
 
@@ -93,9 +94,10 @@ const showNumber = async (req, res) => {
   if (!cookies?.jwt) return res.sendStatus(401);
   const refreshToken = cookies.jwt;
 
-
   const foundUser = await User.findOne({ refreshToken }).exec();
+  if (!foundUser) return res.status(402).json({ "message":'user not found'})
   const email = foundUser.email;
+console.log(email);
 
   const sms = await smsSave.find({ email });
 
@@ -127,10 +129,10 @@ const otp = async (req, res) => {
     return res.status(404).json({ message: "Phone number is expired" });
   } 
 
-  console.log( 'Active2', number_found.Activation_Code, `Status2`,  number_found.status)
+ 
   try {
     const decoded = jwt.verify(number_found.token, process.env.ACCESS_TOKEN_SECRETY);
-      console.log(decoded);
+      
     if (number_found.email !== decoded.UserInfo.email) {
       console.log("Email in token does not match user record");
       return res.status(403).json({ message: "Invalid email" });

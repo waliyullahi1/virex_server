@@ -20,7 +20,7 @@ const newsms = new smsSave({
     Phone_Number:PhoneNumber,
     Country: country,
     App: app,
-    Amount: amount*450,
+    Amount: amount*400,
     token:  sms_Token,
   
  

@@ -21,74 +21,94 @@ const get_rates = async (req, res) => {
   }
 }
 
+
+
+
 const generateNumber = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(401);
-  const refreshToken = cookies.jwt;
+  lock.acquire('transaction-lock', async (done) => {
+    try {
 
-
-  const foundUser = await User.findOne({ refreshToken }).exec();
-if(foundUser) {
-  const { country, app } = req.body;
-  if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
-
-
-  try {
-
-
-    const response1 = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
-    const apps = response1.data
-
-    const matchingApp = apps.find(element => element.app === app);
-    console.log(matchingApp);
-
-    if (Number(matchingApp.rate) * 400 < foundUser.walletBalance) {
-      console.log(Number(matchingApp.rate), Number(matchingApp.rate) * 400);
+      const cookies = req.cookies;
+      if (!cookies?.jwt) return res.sendStatus(401);
+      const refreshToken = cookies.jwt;
+    
+    
+      const foundUser = await User.findOne({ refreshToken }).exec();
+    if(foundUser) {
+      const { country, app } = req.body;
+      if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
+    
+    
       try {
-        const response = await axios.get(`http://pvacodes.com/user/api/get_number.php`,
-          {
-            params: {
-              customer: process.env.PVACODE, // Replace with your actual customer key
-              app: app,
-              country: country,
-            },
+    
+    
+        const response1 = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
+        const apps = response1.data
+    
+        const matchingApp = apps.find(element => element.app === app);
+        console.log(matchingApp);
+    
+        if (Number(matchingApp.rate) * 400 < foundUser.walletBalance) {
+          console.log(Number(matchingApp.rate), Number(matchingApp.rate) * 400);
+          try {
+            const response = await axios.get(`http://pvacodes.com/user/api/get_number.php`,
+              {
+                params: {
+                  customer: process.env.PVACODE, // Replace with your actual customer key
+                  app: app,
+                  country: country,
+                },
+              }
+            );
+            const errors = ['App Not Found.', 'No free channels available check after sometime.', 'Not Enough balance', 'Customer Not Found.', 'New Numbers registration in progress, please wait or check back later.', 'Error 102, check back later.'];
+            console.log(response.data, 'error data');
+            console.log(response, 'error data');
+            if (errors.includes(response.data)) {
+    
+              console.log(response.data, 'error is the matter');
+              res.status(200).json(response.data);
+            } else {
+              console.log('go');
+    
+              const savenumber = await smsSaves(foundUser.email, response.data, matchingApp.rate, country, app)
+              console.log(savenumber);
+              res.json('Number generate successful ')
+            }
+    
+    
+          } catch (error) {
+            console.log(error);
+    
+            res.status(403).json({ "message": " insufficient balance  " });
           }
-        );
-        const errors = ['App Not Found.', 'No free channels available check after sometime.', 'Not Enough balance', 'Customer Not Found.', 'New Numbers registration in progress, please wait or check back later.', 'Error 102, check back later.'];
-        console.log(response.data, 'error data');
-        console.log(response, 'error data');
-        if (errors.includes(response.data)) {
-
-          console.log(response.data, 'error is the matter');
-          res.status(200).json(response.data);
+    
         } else {
-          console.log('go');
-
-          const savenumber = await smsSaves(foundUser.email, response.data, matchingApp.rate, country, app)
-          console.log(savenumber);
-          res.json('Number generate successful ')
+          console.log('insufficent ');
+          res.status(500).json({ "message": " insufficent balance , fund your wallet " });
         }
-
-
+    
       } catch (error) {
-        console.log(error);
-
-        res.status(403).json({ "message": " insufficient balance  " });
+        console.error(error);
+        return res.status(500).json({ message: "An unexpected error occurred." });
       }
-
-    } else {
-      console.log('insufficent ');
-      res.status(500).json({ "message": " insufficent balance , fund your wallet " });
     }
+    
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "An unexpected error occurred." });
-  }
+
+    } finally {
+      done(); // Release the lock
+    }
+  }, (err) => {
+    if (err) {
+      console.error("Lock error:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+
+
+  // Acknowledge receipt
 }
- 
-};
-
 const showNumber = async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);

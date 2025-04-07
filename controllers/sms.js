@@ -106,9 +106,15 @@ console.log(email);
 
 
 
-const otp = async (req, res) => {
 
-  const cookies = req.cookies;
+
+
+
+const otp = async (req, res) => {
+  lock.acquire('transaction-lock', async (done) => {
+    try {
+
+      const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);
 
   const refreshToken = cookies.jwt;
@@ -207,7 +213,21 @@ const otp = async (req, res) => {
       return res.status(403).json({ message: "Invalid token" });
     }
   }
-};
+
+    } finally {
+      done(); // Release the lock
+    }
+  }, (err) => {
+    if (err) {
+      console.error("Lock error:", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+
+
+  // Acknowledge receipt
+}
 
 
 // const otp = async (req, res) => {

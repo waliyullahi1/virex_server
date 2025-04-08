@@ -11,7 +11,9 @@ const fundHistory = async (req, res)=>{
     const email = foundUser.email;
     
     
-    const fund = await Found.find({ email:email }) 
+    const findfund = await Found.find({ email:email }) 
+    const fund = findfund.filter(txn => txn.status !== 'processing');
+    
     res.json(fund)
 }
 

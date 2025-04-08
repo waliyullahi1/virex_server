@@ -124,7 +124,7 @@ const Fund_wallet_by_transfer = async (req, res) => {
     if (!amount || !payment_type) {
       return res.status(400).json({ error: "Amount and payment type are required" });
     }
-    const retrieve_transaction = await FundSchema.findOne({ status: "processing", email: userFound.email })
+    const retrieve_transaction = await FundSchema.findOne({ status: "processing", email: userFound.email, amount })
       .sort({ _id: -1 }) // Sort by descending order to get the latest document
       .exec();
     console.log(retrieve_transaction);

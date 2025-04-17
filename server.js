@@ -28,7 +28,7 @@ app.use(logger);
 
 const corsOptions = {
 
-  origin: ['http://localhost:3000','https://virex-lemon.vercel.app',],
+  origin: ['http://localhost:3000','https://virex-lemon.vercel.app','https://www.virex.codes'],
   credentials: true,
   // optionsSuccessStatus:40
   allowedHeaders: ["Content-Type", "Authorization"],

@@ -21,7 +21,7 @@ app.use(logger);
 
 
 
-const allowedOrigins = ['http://localhost:3000', 'https://www.virex.codes'];
+const allowedOrigins = ['http://localhost:3000', 'https://virex.codes'];
 
 const corsOptions = {
   origin: function (origin, callback) {

@@ -16,21 +16,30 @@ const credentials = require("./middleware/credentials");
 
 
 
-connectDB();
 
 app.use(logger);
 
 
 
+const allowedOrigins = ['http://localhost:3000', 'https://www.virex.codes'];
+
 const corsOptions = {
-
-  origin: ['http://localhost:3000','https://www.virex.codes'],
+  origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus:200,
-  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
+  allowedHeaders: ["Content-Type", "Authorization"]
 };
-app.use(cors(corsOptions));
 
+app.use(credentials); // middleware to handle pre-flight
+app.use(cors(corsOptions));
 
 //Build-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));

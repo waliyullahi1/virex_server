@@ -15,22 +15,18 @@ const connectDB = require("./config/db");
 const credentials = require("./middleware/credentials");
 
 
-//connect to mongoose
+
 connectDB();
 
 app.use(logger);
 
-// Handle options credentials check - before CORS!
-// and fetch cookies credentials requirement
-//  app.use(credentials);
 
-//Cross Origin Resource sharing
 
 const corsOptions = {
 
   origin: ['http://localhost:3000','https://virex-lemon.vercel.app','https://www.virex.codes'],
   credentials: true,
-  // optionsSuccessStatus:40
+  optionsSuccessStatus:200,
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));

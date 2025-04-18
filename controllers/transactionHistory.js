@@ -12,7 +12,9 @@ const transactionHistory = async (req, res)=>{
     const email = foundUser.email
     await checktracsaction(email)
 
-    const transactions = await Transaction.find({ user:email }).sort({arrangedate: -1}); 
+    const transactions = await Transaction.find({ user:email,
+        status: { $in: ['success', 'pending'] }
+     }).sort({arrangedate: -1}); 
     res.json(transactions)
 }
 

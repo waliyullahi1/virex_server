@@ -36,7 +36,6 @@ app.use(cors(corsOptions));
 //Build-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));
 
-//buld-in middleware for json
 app.use(express.json());
 
 //middleware for cookies

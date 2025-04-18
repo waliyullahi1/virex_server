@@ -14,29 +14,21 @@ const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const credentials = require("./middleware/credentials");
 
-
+connectDB();
 
 
 app.use(logger);
 
 
 
-const allowedOrigins = ['http://localhost:3000', 'https://virex.codes'];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    // allow requests with no origin like mobile apps or curl requests
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+
+  origin: ['https://virex.codes','https://www.virex.codes', 'http://localhost:3090'],
   credentials: true,
-  optionsSuccessStatus: 200,
-  allowedHeaders: ["Content-Type", "Authorization"]
+   optionsSuccessStatus:200
+
 };
+app.use(cors(corsOptions));
 
 app.use(credentials); // middleware to handle pre-flight
 app.use(cors(corsOptions));

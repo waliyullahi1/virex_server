@@ -23,7 +23,7 @@ app.use(logger);
 
 const corsOptions = {
 
-  origin: ['https://virex.codes','https://www.virex.codes', 'http://localhost:3090'],
+  origin: ['https://virex.codes','https://www.virex.codes'],
   credentials: true,
    optionsSuccessStatus:200
 

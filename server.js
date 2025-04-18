@@ -65,7 +65,7 @@ app.use("/getRates", require("./route/sms"));
 app.get(
   "/red(.html)?",
   (req, res, next) => {
-    console.log("Allah help me");
+    console.log("e");
     next();
   },
   (req, res) => {

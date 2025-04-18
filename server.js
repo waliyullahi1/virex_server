@@ -30,9 +30,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use(credentials); // middleware to handle pre-flight
-app.use(cors(corsOptions));
-
 //Build-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));
 

@@ -14,32 +14,25 @@ const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const credentials = require("./middleware/credentials");
 
-
-//connect to mongoose
 connectDB();
+
 
 app.use(logger);
 
-// Handle options credentials check - before CORS!
-// and fetch cookies credentials requirement
-//  app.use(credentials);
 
-//Cross Origin Resource sharing
 
 const corsOptions = {
 
-  origin: ['https://virex-lemon.vercel.app','https://www.virex.codes','https://www.abaniseedu.com', 'http://localhost:3000'],
+  origin: ['https://virex.codes','https://www.virex.codes', 'http://localhost:3000'],
   credentials: true,
-  // optionsSuccessStatus:40
+   optionsSuccessStatus:200
 
 };
 app.use(cors(corsOptions));
 
-
 //Build-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));
 
-//buld-in middleware for json
 app.use(express.json());
 
 //middleware for cookies
@@ -51,7 +44,7 @@ app.use("/", express.static(path.join(__dirname, "/public")));
 //routes
 app.use("/", require("./route/root"));
 
-aapp.use("/register", require("./route/api/register"));
+app.use("/register", require("./route/api/register"));
 app.use("/login", require("./route/api/login"));
 app.use("/logout", require("./route/api/logout"));
 app.use("/refresh", require("./route/refreshToken"));
@@ -65,31 +58,11 @@ app.use("/getRates", require("./route/sms"));
 
 
 
-const os = require("os");
-const networkInterfaces = os.networkInterfaces();
-let addresses = [];
-
-for (const k in networkInterfaces) {
-  for (const k2 in networkInterfaces[k]) {
-    const address = networkInterfaces[k][k2];
-    if (address.family === "IPv4" && !address.internal) {
-      addresses.push(address.address);
-    }
-  }
-}
-
-console.log(addresses);
-
-
-
-
-// app.use(verifyJWT);
-app.use("/employees", require("./route/api/employees"));
 
 app.get(
   "/red(.html)?",
   (req, res, next) => {
-    console.log("Allah help me");
+    console.log("e");
     next();
   },
   (req, res) => {

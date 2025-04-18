@@ -27711,3 +27711,10 @@ a6bebdb3-2463-432d-9b51-66397b692eff	 2025 Apr 008	012:26:30 	GET	 http://localh
 75454e5a-2f8b-4145-aa51-d47e0e715ca7	 2025 Apr 008	012:26:32 	POST	 http://localhost:3000	 /fund/valid
 26a27b39-bdbe-4709-ade4-68cd64df878a	 2025 Apr 008	012:26:35 	POST	 http://localhost:3000	 /fund/valid
 6d1ae6eb-b5dd-4287-8b9d-b310d7b6ec7b	 2025 Apr 008	012:26:35 	POST	 http://localhost:3000	 /fund/valid
+efa03645-b528-4c88-ab06-3074bc355fc9	 2025 Apr 018	008:18:17 	GET	 http://localhost:3000	 /getRates/apps/Swaziland
+a839d814-6eea-449f-9cf6-8926370cc428	 2025 Apr 018	008:18:40 	GET	 http://localhost:3000	 /getRates/apps/Barbados
+dfdb7a2e-a29f-4e2c-84ea-f7e8de0648d5	 2025 Apr 018	008:19:25 	GET	 http://localhost:3000	 /getRates/apps/Belgium
+e7923a6c-70f6-41ea-8e50-a17fd59339aa	 2025 Apr 018	008:21:37 	OPTIONS	 https://www.virex.codes	 /login
+69b11789-0d0e-49a2-94fa-673e58018bf3	 2025 Apr 018	008:21:37 	POST	 https://www.virex.codes	 /login
+56a28f0e-69c3-4098-a9c6-7f3963434014	 2025 Apr 018	008:21:58 	OPTIONS	 https://www.virex.codes	 /getRates/apps/US
+f5282dfc-f629-48ab-a8c4-595b3d9b6399	 2025 Apr 018	008:21:58 	GET	 https://www.virex.codes	 /getRates/apps/US

@@ -155,9 +155,10 @@ const Fund_wallet_by_transfer = async (req, res) => {
     // Generate a unique transaction reference
     const tx_ref = `TX-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     console.log(tx_ref, 'first');
-
+    const public = 'FLWPUBK-3441a7d6bfb8753d177f53a0c7136302-X'
+    const security = 'FLWSECK-969940db0e57860879904ee02371a897-1964fd68895vt-X'
     //Initialize Flutterwave
-    const flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY);
+    const flw = new Flutterwave(public, security);
 
     // Transaction details
     const details = {

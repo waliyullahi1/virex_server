@@ -2,10 +2,10 @@ const User = require("../model/Users");
 const smsSave = require('../model/sms')
 const axios = require('axios')
 const smsSaves = require('./savesms')
-
+const AsyncLock = require('async-lock');
 const jwt = require("jsonwebtoken");
-const e = require("express");
 
+const lock = new AsyncLock();
 
 
 

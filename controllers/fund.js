@@ -40,17 +40,17 @@ async function fetchTime() {
       ;
       return data.dateTime;
     } catch (error) {
-      console.log("Error fetching time, retrying...");
+      //console.log("Error fetching time, retrying...");
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
     }
   }
 
-  console.log("Failed to fetch time after 3 minutes. Retrying...");
+  //console.log("Failed to fetch time after 3 minutes. Retrying...");
   return fetchTime(); // Restart the function after 3 minutes
 }
 
 async function verifyPayment(transactionId) {
-  console.log(transactionId);
+  //console.log(transactionId);
 
   try {
     const response = await axios.get(
@@ -127,34 +127,34 @@ const Fund_wallet_by_transfer = async (req, res) => {
     const retrieve_transaction = await FundSchema.findOne({ status: "processing", email: userFound.email, amount })
       .sort({ _id: -1 }) // Sort by descending order to get the latest document
       .exec();
-    console.log(retrieve_transaction);
+    //console.log(retrieve_transaction);
 
     if (retrieve_transaction) {
-      console.log('one transaction is pending');
+      //console.log('one transaction is pending');
 
       const current_time = await fetchTime()
-      console.log(current_time, 'cuurent time');
-      console.log(retrieve_transaction.account_expiration, 'expiretime');
-      console.log(retrieve_transaction && new Date(retrieve_transaction.account_expiration) < new Date(current_time));
+      //console.log(current_time, 'cuurent time');
+     // console.log(retrieve_transaction.account_expiration, 'expiretime');
+      //console.log(retrieve_transaction && new Date(retrieve_transaction.account_expiration) < new Date(current_time));
 
       if (
         retrieve_transaction &&
         retrieve_transaction.account_expiration &&
         new Date(retrieve_transaction.account_expiration) > new Date(current_time)
       ) {
-        console.log('Transaction has not expired.');
+        //console.log('Transaction has not expired.');
 
         const transaction_details = retrieve_transaction;
         return res.json({ transaction_details });
       } else {
-        console.log("Transaction has expired or transaction details are missing.");
+        //console.log("Transaction has expired or transaction details are missing.");
       }
 
 
     }
     // Generate a unique transaction reference
     const tx_ref = `TX-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    console.log(tx_ref, 'first');
+    //console.log(tx_ref, 'first');
     const public = 'FLWPUBK-3441a7d6bfb8753d177f53a0c7136302-X'
     const security = 'FLWSECK-969940db0e57860879904ee02371a897-1964fd68895vt-X'
     //Initialize Flutterwave
@@ -173,7 +173,7 @@ const Fund_wallet_by_transfer = async (req, res) => {
 
     // Process bank transfer
     const response = await flw.Charge.bank_transfer(details);
-    console.log(await response.meta);
+    //console.log(await response.meta);
 
     // Ensure response contains authorization details
     if (!response.meta || !response.meta.authorization) {
@@ -183,7 +183,7 @@ const Fund_wallet_by_transfer = async (req, res) => {
     const transac_dts = response.meta.authorization;
 
     // Save transaction details
-    console.log(tx_ref, 'second');
+    //console.log(tx_ref, 'second');
     const savefound = await savenewFund(
       userFound.email,
       tx_ref,
@@ -201,7 +201,7 @@ const Fund_wallet_by_transfer = async (req, res) => {
     // Return response
     res.json({ transaction_details });
   } catch (error) {
-    console.error("Transaction Error:", error);
+    //console.error("Transaction Error:", error);
     res.status(500).json({ error: "Transaction failed" });
   }
 };
@@ -229,13 +229,13 @@ const fund_wallet_by_card = async (req, res) => {
 
 
     // Initialize Flutterwave
-    console.log(id);
+    //console.log(id);
 
     const transaction_id = await verifyPayment(id);
-    console.log(transaction_id);
+    //console.log(transaction_id);
 
     if (!transaction_id) return res.status(401).json({ message: 'no transaction fund' })
-    console.log(transaction_id.data.status, 'vcdxcc')
+    //console.log(transaction_id.data.status, 'vcdxcc')
     if (transaction_id.data.status === "successful") {
       const transaction_details = transaction_id.data
       const converttime = changedate(transaction_details.created_at)
@@ -268,7 +268,7 @@ const fund_wallet_by_card = async (req, res) => {
     // Return response
     return
   } catch (error) {
-    console.error("Transaction Error:", error);
+    //console.error("Transaction Error:", error);
     res.status(500).json({ error: "Transaction failed" });
   }
 };
@@ -279,20 +279,20 @@ const webhook = async (req, res) => {
 
 
       const event = req.body;
-      console.log(event);
+      //console.log(event);
 
 
       const verify = await verifyPayment(event.id);
-      console.log(verify);
+      //console.log(verify);
 
       if (verify.status === "successful") {
-        console.log("Payment successful:", verify.status, verify.data.tx_ref);
+        //console.log("Payment successful:", verify.status, verify.data.tx_ref);
 
         ; // Use event.tx_ref, assuming correct key
 
 
         const transaction = await FundSchema.findOne({ tx_ref: event.txRef }).exec();
-        console.log(transaction);
+       //console.log(transaction);
         if (transaction) {
           if (transaction.status === "successful") {
             console.log("Transaction already processed");
@@ -304,13 +304,13 @@ const webhook = async (req, res) => {
           transaction.transaction_id = event.id
 
           await transaction.save(); // Ensure the save completes
-          console.log(transaction, 'ffffff');
+          //console.log(transaction, 'ffffff');
 
           // Find user
           const user = await User.findOne({ email: transaction.email }).exec();
 
           if (!user) {
-            console.log("User not found");
+           // console.log("User not found");
             return;
           }
 
@@ -318,13 +318,13 @@ const webhook = async (req, res) => {
           user.walletBalance += verify.amount_settled;
           await user.save(); // Save updated user balance
 
-          console.log("Updated user balance:", user.walletBalance);
+          //console.log("Updated user balance:", user.walletBalance);
         } else {
-          console.log("Transaction not found"); // Improved error message
+          //console.log("Transaction not found"); // Improved error message
           return;
         }
       } else {
-        console.log(verify.status);
+        //console.log(verify.status);
         if (verify.status === "failed" || verify.status === "timeout" || verify.status === "cancelled") {
 
           const transaction = await FundSchema.findOne({ tx_ref: event.txRef }).exec();
@@ -345,7 +345,7 @@ const webhook = async (req, res) => {
     }
   }, (err) => {
     if (err) {
-      console.error("Lock error:", err);
+      //console.error("Lock error:", err);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -362,7 +362,7 @@ const valid_transaction = async (req, res) => {
     try {
       const cookies = req.cookies;
       if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized: No token provided" });
-      console.log("i see something");
+      //console.log("i see something");
       const current_time = await fetchTime()
       const refreshToken = cookies.jwt;
       const userFound = await Virexscheme.findOne({ refreshToken }).exec();
@@ -375,19 +375,19 @@ const valid_transaction = async (req, res) => {
       const transact_found = await FundSchema.findOne({ tx_ref })
       if (transact_found) {
         if (transact_found.status === "Expired") {
-          console.log('expired');
+          //console.log('expired');
 
           await transact_found.deleteOne();;
           return res.status(200).json({ message: "Expired" });
         }
         if (transact_found.status === 'successful' || transact_found.status === "failed" || transact_found.status === "timeout" || transact_found.status === "cancelled") {
-          console.log("transaction already process");
+          //console.log("transaction already process");
 
           return res.status(200).json({ message: transact_found.status });
         } else {
 
           if (transact_found.account_expiration && new Date(transact_found.account_expiration) < new Date(current_time)) {
-            console.log("i see something6");
+            //console.log("i see something6");
             const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
 
             if (!valid_transaction_id.status) {
@@ -407,7 +407,7 @@ const valid_transaction = async (req, res) => {
               // Find user based on email linked to the transaction
               const user = await User.findOne({ email: transact_found.email }).exec();
               if (!user) {
-                console.log("User not found");
+                //console.log("User not found");
                 return res.status(404).json({ message: "User not found" });
               }
 
@@ -438,7 +438,7 @@ const valid_transaction = async (req, res) => {
             if (valid_transaction_id && valid_transaction_id.status === "successful") {
 
               if (transact_found.status === "successful") {
-                console.log("Transaction already processed successfully. Skipping duplicate processing.");
+                //console.log("Transaction already processed successfully. Skipping duplicate processing.");
                 return res.status(200).json({ message: "Transaction already processed" });
               }
 
@@ -450,15 +450,15 @@ const valid_transaction = async (req, res) => {
               // Find user based on email linked to the transaction
               const user = await User.findOne({ email: transact_found.email }).exec();
               if (!user) {
-                console.log("User not found");
+                //console.log("User not found");
                 return res.status(404).json({ message: "User not found" });
               }
-              console.log(valid_transaction_id.amount_settled);
-              console.log(user.walletBalance);
+             // console.log(valid_transaction_id.amount_settled);
+              //console.log(user.walletBalance);
               // Update the user's wallet balance based on transaction amount
               user.walletBalance += valid_transaction_id.amount_settled;
               await user.save(); // Save updated user balance
-              console.log(user.walletBalance);
+              //console.log(user.walletBalance);
 
               return res.status(200).json({ message: valid_transaction_id.status });
 
@@ -467,7 +467,7 @@ const valid_transaction = async (req, res) => {
               // Handle failed, pending, or other transaction statuses
               if (valid_transaction_id && (valid_transaction_id.status === "failed" || valid_transaction_id.status === "pending")) {
                 transact_found.status = valid_transaction_id.status;
-                console.log("i see something12"); // Update to failed/pending
+                //console.log("i see something12"); // Update to failed/pending
                 await transact_found.save();
                 return res.status(200).json({ message: valid_transaction_id.status });
               }
@@ -485,152 +485,152 @@ const valid_transaction = async (req, res) => {
     }
   }, (err) => {
     if (err) {
-      console.error("Lock error:", err);
+      //console.error("Lock error:", err);
       return res.status(500).json({ message: "Internal server error" });
     }
   });
 };
-const valii_transaction = async (req, res) => {
-  try {
-    if (isLocked) {
-      return res.status(429).json({ message: "Transaction is already in process. Please wait." });
-    }
+// const valii_transaction = async (req, res) => {
+//   try {
+//     if (isLocked) {
+//       return res.status(429).json({ message: "Transaction is already in process. Please wait." });
+//     }
 
-    isLocked = true;
-
-
-
-    let isLocked = false;
-
-    const cookies = req.cookies;
-    if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized: No token provided" });
-    console.log("i see something");
-    const current_time = await fetchTime()
-    const refreshToken = cookies.jwt;
-    const userFound = await Virexscheme.findOne({ refreshToken }).exec();
-    if (!userFound) return res.status(401).json({ message: "User not found" });
-    const { tx_ref } = req.body;
-
-
-    if (!tx_ref) return res.status(400).json({ message: "Transaction reference is required" });
-
-    const transact_found = await FundSchema.findOne({ tx_ref })
-    if (transact_found) {
-      if (transact_found.status === "Expired") {
-        console.log('expired');
-
-        await transact_found.deleteOne();;
-        return res.status(200).json({ message: "Expired" });
-      }
-      if (transact_found.status === 'successful' || transact_found.status === "failed" || transact_found.status === "timeout" || transact_found.status === "cancelled") {
-        console.log("transaction already process");
-
-        return res.status(200).json({ message: transact_found.status });
-      } else {
-
-        if (transact_found.account_expiration && new Date(transact_found.account_expiration) < new Date(current_time)) {
-          console.log("i see something6");
-          const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
-
-          if (!valid_transaction_id.status) {
-            await transact_found.deleteOne();
-            return res.status(200).json({ message: "Expired" });
-          }
-
-
-          // Check if the transaction was successful
-          if (valid_transaction_id && valid_transaction_id.status === "successful") {
-
-            // Update transaction record
-            transact_found.status = valid_transaction_id.status;
-            transact_found.transaction_id = valid_transaction_id.id;
-            await transact_found.save(); // Save transaction status update
-
-            // Find user based on email linked to the transaction
-            const user = await User.findOne({ email: transact_found.email }).exec();
-            if (!user) {
-              console.log("User not found");
-              return res.status(404).json({ message: "User not found" });
-            }
-
-            // Update the user's wallet balance based on transaction amount
-            user.walletBalance += valid_transaction_id.amount_settled;
-            await user.save(); // Save updated user balance
-
-            return res.status(200).json({ message: valid_transaction_id.status });
-
-          } else {
-            // Handle failed, pending, or other transaction statuses
-            if (valid_transaction_id && (valid_transaction_id.status === "failed" || valid_transaction_id.status === "pending")) {
-              transact_found.status = valid_transaction_id.status;  // Update to failed/pending
-              await transact_found.save();
-              return res.status(200).json({ message: valid_transaction_id.status });
-            } else {
-              const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
-              if (!valid_transaction_id.status) return res.status(200).json({ message: "Expired" });
-              return res.status(400).json({ message: "Invalid transaction or status not recognized" });
-            }
-          }
-
-        } else {
-          const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
-
-          if (!valid_transaction_id.status) return res.status(200).json({ message: "Transaction still under process" })
-
-          if (valid_transaction_id && valid_transaction_id.status === "successful") {
-
-            if (transact_found.status === "successful") {
-              console.log("Transaction already processed successfully. Skipping duplicate processing.");
-              return res.status(200).json({ message: "Transaction already processed" });
-            }
-
-            // Update transaction record
-            transact_found.status = valid_transaction_id.status;
-            transact_found.transaction_id = valid_transaction_id.id;
-            await transact_found.save(); // Save transaction status update
-
-            // Find user based on email linked to the transaction
-            const user = await User.findOne({ email: transact_found.email }).exec();
-            if (!user) {
-              console.log("User not found");
-              return res.status(404).json({ message: "User not found" });
-            }
-            console.log(valid_transaction_id.amount_settled);
-            console.log(user.walletBalance);
-            // Update the user's wallet balance based on transaction amount
-            user.walletBalance += valid_transaction_id.amount_settled;
-            await user.save(); // Save updated user balance
-            console.log(user.walletBalance);
-
-            return res.status(200).json({ message: valid_transaction_id.status });
-
-          } else {
-
-            // Handle failed, pending, or other transaction statuses
-            if (valid_transaction_id && (valid_transaction_id.status === "failed" || valid_transaction_id.status === "pending")) {
-              transact_found.status = valid_transaction_id.status;
-              console.log("i see something12"); // Update to failed/pending
-              await transact_found.save();
-              return res.status(200).json({ message: valid_transaction_id.status });
-            }
-          }
-        }
-      }
-
-    } else {
-
-      return res.status(401).json({ message: 'No record found for this transaction' })
-    }
+//     isLocked = true;
 
 
 
-  } finally {
-    // Release the lock after processing
-    isLocked = false;
-  }
+//     let isLocked = false;
+
+//     const cookies = req.cookies;
+//     if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized: No token provided" });
+//     //console.log("i see something");
+//     const current_time = await fetchTime()
+//     const refreshToken = cookies.jwt;
+//     const userFound = await Virexscheme.findOne({ refreshToken }).exec();
+//     if (!userFound) return res.status(401).json({ message: "User not found" });
+//     const { tx_ref } = req.body;
 
 
-}
+//     if (!tx_ref) return res.status(400).json({ message: "Transaction reference is required" });
+
+//     const transact_found = await FundSchema.findOne({ tx_ref })
+//     if (transact_found) {
+//       if (transact_found.status === "Expired") {
+//         console.log('expired');
+
+//         await transact_found.deleteOne();;
+//         return res.status(200).json({ message: "Expired" });
+//       }
+//       if (transact_found.status === 'successful' || transact_found.status === "failed" || transact_found.status === "timeout" || transact_found.status === "cancelled") {
+//        // console.log("transaction already process");
+
+//         return res.status(200).json({ message: transact_found.status });
+//       } else {
+
+//         if (transact_found.account_expiration && new Date(transact_found.account_expiration) < new Date(current_time)) {
+//           console.log("i see something6");
+//           const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
+
+//           if (!valid_transaction_id.status) {
+//             await transact_found.deleteOne();
+//             return res.status(200).json({ message: "Expired" });
+//           }
+
+
+//           // Check if the transaction was successful
+//           if (valid_transaction_id && valid_transaction_id.status === "successful") {
+
+//             // Update transaction record
+//             transact_found.status = valid_transaction_id.status;
+//             transact_found.transaction_id = valid_transaction_id.id;
+//             await transact_found.save(); // Save transaction status update
+
+//             // Find user based on email linked to the transaction
+//             const user = await User.findOne({ email: transact_found.email }).exec();
+//             if (!user) {
+//               //console.log("User not found");
+//               return res.status(404).json({ message: "User not found" });
+//             }
+
+//             // Update the user's wallet balance based on transaction amount
+//             user.walletBalance += valid_transaction_id.amount_settled;
+//             await user.save(); // Save updated user balance
+
+//             return res.status(200).json({ message: valid_transaction_id.status });
+
+//           } else {
+//             // Handle failed, pending, or other transaction statuses
+//             if (valid_transaction_id && (valid_transaction_id.status === "failed" || valid_transaction_id.status === "pending")) {
+//               transact_found.status = valid_transaction_id.status;  // Update to failed/pending
+//               await transact_found.save();
+//               return res.status(200).json({ message: valid_transaction_id.status });
+//             } else {
+//               const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
+//               if (!valid_transaction_id.status) return res.status(200).json({ message: "Expired" });
+//               return res.status(400).json({ message: "Invalid transaction or status not recognized" });
+//             }
+//           }
+
+//         } else {
+//           const valid_transaction_id = await verifyTransactionByTxRef(transact_found.tx_ref);
+
+//           if (!valid_transaction_id.status) return res.status(200).json({ message: "Transaction still under process" })
+
+//           if (valid_transaction_id && valid_transaction_id.status === "successful") {
+
+//             if (transact_found.status === "successful") {
+//              // console.log("Transaction already processed successfully. Skipping duplicate processing.");
+//               return res.status(200).json({ message: "Transaction already processed" });
+//             }
+
+//             // Update transaction record
+//             transact_found.status = valid_transaction_id.status;
+//             transact_found.transaction_id = valid_transaction_id.id;
+//             await transact_found.save(); // Save transaction status update
+
+//             // Find user based on email linked to the transaction
+//             const user = await User.findOne({ email: transact_found.email }).exec();
+//             if (!user) {
+//              //console.log("User not found");
+//               return res.status(404).json({ message: "User not found" });
+//             }
+//             //console.log(valid_transaction_id.amount_settled);
+//             //console.log(user.walletBalance);
+//             // Update the user's wallet balance based on transaction amount
+//             user.walletBalance += valid_transaction_id.amount_settled;
+//             await user.save(); // Save updated user balance
+//             //console.log(user.walletBalance);
+
+//             return res.status(200).json({ message: valid_transaction_id.status });
+
+//           } else {
+
+//             // Handle failed, pending, or other transaction statuses
+//             if (valid_transaction_id && (valid_transaction_id.status === "failed" || valid_transaction_id.status === "pending")) {
+//               transact_found.status = valid_transaction_id.status;
+//               //console.log("i see something12"); // Update to failed/pending
+//               await transact_found.save();
+//               return res.status(200).json({ message: valid_transaction_id.status });
+//             }
+//           }
+//         }
+//       }
+
+//     } else {
+
+//       return res.status(401).json({ message: 'No record found for this transaction' })
+//     }
+
+
+
+//   } finally {
+//     // Release the lock after processing
+//     isLocked = false;
+//   }
+
+
+// }
 
 
 module.exports = { Fund_wallet_by_transfer, webhook, valid_transaction, fund_wallet_by_card } 

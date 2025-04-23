@@ -55,6 +55,7 @@ app.use("/resetpassword", require("./route/resetpassword"));
 app.use("/veryfyJWT", require("./middleware/verifyJWT"));
 app.use("/valid", require("./controllers/verify"));
 app.use("/getRates", require("./route/sms"));
+app.get('/ping', require("./route/ping"));
 
  
 

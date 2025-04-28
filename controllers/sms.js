@@ -63,6 +63,7 @@ const generateNumber = async (req, res) => {
             const errors = ['App Not Found.', 'No free channels available check after sometime.', 'Not Enough balance', 'Customer Not Found.', 'New Numbers registration in progress, please wait or check back later.', 'Error 102, check back later.'];
             console.log(response.data, 'error data');
             console.log(response, 'error data');
+            
             if (errors.includes(response.data)) {
     
               console.log(response.data, 'error is the matter');

@@ -246,7 +246,7 @@ const fund_wallet_by_card = async (req, res) => {
         transaction_details.tx_ref,
         transaction_details.payment_type,
         'none',
-        transaction_details.amount,
+        transaction_details.amount_settled,
         'none',
         transaction_details.status, // Explicitly passing status
         'none',

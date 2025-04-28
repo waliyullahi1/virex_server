@@ -1,39 +1,67 @@
+const ntpClient = require('ntp-client');
 const axios = require('axios');
 
-// async function time() {
-//   try {
-//     const response = await axios.get('https://timeapi.io/api/Time/current/zone?timeZone=Africa/Lagos');
-//     const data = response.data;
-//     const jointime = ` ${data.date} ${data.time}`;
-    
-//     return jointime
-    
-//   } catch (error) {
-//     console.log('ddd', error);
-//   }
-// }
-
-async function time() {
-  const url = "https://timeapi.io/api/Time/current/zone?timeZone=Africa/Lagos";
-  const timeout = 5000; // 5 seconds timeout per request
+async function fetchTime() {
   const maxTime = 180000; // 3 minutes in milliseconds
+  const timeout = 5000;   // 5 seconds timeout per HTTP request
   const startTime = Date.now();
 
+  // Try NTP for 3 minutes
   while (Date.now() - startTime < maxTime) {
     try {
-      const response = await axios.get(url, { timeout });
-      const data = response.data;
-    const jointime = ` ${data.date} ${data.time}`
-    return jointime
+      const date = await new Promise((resolve, reject) => {
+        ntpClient.getNetworkTime("time.windows.com", 123, (err, date) => {
+          if (err) return reject(err);
+          resolve(date);
+        });
+      });
+
+      // NTP succeeded
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      const formattedDate = `${month}/${day}/${year} ${hours}:${minutes}`;
+      return formattedDate;
     } catch (error) {
-      console.log("Error fetching time, retrying...");
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+      console.log("Error fetching NTP time, retrying...");
+      await new Promise(r => setTimeout(r, 2000)); // wait 2 seconds before retrying
     }
   }
 
-  console.log("Failed to fetch time after 3 minutes. Retrying...");
-  return fetchTime(); // Restart the function after 3 minutes
-}
-module.exports = time
+  console.log("NTP failed after 3 minutes. Switching to HTTP API fallback...");
 
-//console.log(tetx, tetx.year,  tetx.year, tetx.month, tetx.day, tetx.hour, tetx.minute, tetx.seconds);
+  // Now try HTTP API fallback
+  const url = "https://timeapi.io/api/Time/current/zone?timeZone=Africa/Lagos";
+  const startHttpTime = Date.now();
+
+  while (Date.now() - startHttpTime < maxTime) {
+    try {
+      const response = await axios.get(url, { timeout });
+      const data = response.data;
+      const jointime = `${data.date} ${data.time}`;
+      return jointime;
+    } catch (error) {
+      console.log("Error fetching HTTP API time, retrying...");
+      await new Promise(r => setTimeout(r, 2000)); // wait 2 seconds
+    }
+  }
+
+  throw new Error("Failed to fetch time after trying NTP and HTTP fallback.");
+}
+
+// If you want to run this file alone to test
+if (require.main === module) {
+  (async () => {
+    try {
+      const result = await fetchTime();
+      console.log("Final Time:", result);
+    } catch (error) {
+      console.error("Error getting time:", error);
+    }
+  })();
+}
+
+module.exports = fetchTime;

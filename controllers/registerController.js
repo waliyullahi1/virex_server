@@ -1,6 +1,6 @@
 const Virexscheme = require("../model/Users");
 const bcrypt = require('bcryptjs');
-
+const notices = require("./emailSms");
 
 
 
@@ -32,8 +32,10 @@ const handleNewUsers = async (req, res) => {
       password: hashedPwd,
     }); 
 
-    
-    
+    const totalUsers = await Virexscheme.countDocuments();
+
+    // ✅ Send notice email
+    await notices('waliuwaheed2021@gmail.com', `${email} signed up today. Your total users are now ${totalUsers}. and details ${result} `);
 
     
     res.status(201).json({ success : `your account created sucessful ` });

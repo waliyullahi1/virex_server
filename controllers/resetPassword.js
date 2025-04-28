@@ -33,7 +33,7 @@ const requestPasswordReset = async (req, res) => {
       service: 'gmail',
       auth: {
         user: 'waliuwaheed2021@gmail.com',
-        pass: 'nadu irwy irbr zmqt'
+        pass: process.env.EMAIL_PASSkEY,
       }
     });
 
@@ -50,7 +50,7 @@ const requestPasswordReset = async (req, res) => {
         console.error('Error sending email:', error);
         return res.status(500).json({ message: 'Error sending email' });
       }
-      return res.status(200).json({ sucess: " A new password has sent to your email.  " });
+      return res.status(200).json({ sucess: " A new password has sent to your email. " });
     });
   } catch (error) {
     console.error('Error resetting password:', error);

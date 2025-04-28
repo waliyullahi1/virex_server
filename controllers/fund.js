@@ -7,7 +7,7 @@ const axios = require('axios')
 const User = require("../model/Users");
 const AsyncLock = require('async-lock');
 const lock = new AsyncLock();
-
+const notices = require("./emailSms");
 
 
 // Format the date to "MM/DD/YYYY HH:mm"
@@ -196,7 +196,7 @@ const Fund_wallet_by_transfer = async (req, res) => {
       'none',
       'none'
     );
-   
+
     const transaction_details = savefound
     // Return response
     res.json({ transaction_details });

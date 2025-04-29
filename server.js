@@ -56,7 +56,7 @@ app.use("/veryfyJWT", require("./middleware/verifyJWT"));
 app.use("/valid", require("./controllers/verify"));
 app.use("/getRates", require("./route/sms"));
 app.use('/ping', require("./route/ping"));
-
+app.use('/notices', require("./route/notices"));
  
 
 

@@ -28916,3 +28916,8 @@ a40e2e8e-8e70-4e55-87a1-de798a3c0e78	 2025 Jun 024	007:41:23 	GET	 http://localh
 a8bf5401-082f-4e4c-8a71-3a77d0800c20	 2025 Jun 024	007:41:24 	GET	 http://localhost:3000	 /getRates
 95186c78-dc89-4638-a8f2-27abc2b10fd9	 2025 Jun 024	007:41:27 	GET	 http://localhost:3000	 /getRates/apps/US
 6c4da75e-65c0-4886-a10c-526645902619	 2025 Jun 024	007:43:31 	GET	 undefined	 /getRates/apps/usa
+cdb328dd-421c-42d6-8edb-4083b49c1441	 2025 Jun 024	008:13:43 	GET	 undefined	 /getRates/apps/us
+0e1e0851-320d-44db-9b5f-b55e88016d32	 2025 Jun 024	008:22:59 	GET	 undefined	 /getRates/apps/us
+f091165f-416a-4f3c-a329-fb39ce285b49	 2025 Jun 024	008:23:00 	GET	 undefined	 /.well-known/appspecific/com.chrome.devtools.json
+40623d1d-bd3e-4361-afcf-0e64ed755973	 2025 Jun 024	008:23:43 	GET	 undefined	 /getRates/apps/us
+d4cc8e18-f501-4e1c-988e-e186908f2a23	 2025 Jun 024	008:23:45 	GET	 undefined	 /.well-known/appspecific/com.chrome.devtools.json

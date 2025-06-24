@@ -1,61 +1,46 @@
-const mongoose = require('mongoose');
-const fetchTime = require("../config/fetchtime");
+const mongoose = require("mongoose");
+const Scheme = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
-  first_Name: {
+const Virexscheme = new Scheme({
+  full_name: {
     type: String,
-    required: true
+    require: true,
   },
-  last_Name: {
-    type: String,
-    required: true
-  },
-  middle_Name: {
-    type: String,
-    required: true
-  },
+
   email: {
     type: String,
-    required: true,
-    unique: true
+    require: true,
   },
-  phone_Number: {
-    type: String
+
+  roles: {
+    User: {
+      type: String,
+      default: 2001,
+    },
+    Editor: Number,
+    Admin: Number,
   },
   password: {
-    type: String // optional if using OAuth
-  },
-  authProvider: {
     type: String,
-    enum: ['local', 'google'],
-    default: 'local'
+    require: true,
   },
-  role: {
+
+
+  phone: {
     type: String,
-    enum: ['Candidate', 'Employer', 'Admin'],
-    default: 'Candidate' // Correctly placed default outside the enum object
+    require: true,
   },
-  status: { // status field to handle verification
+
+  walletBalance: {
+    type: Number,
+    default: 0, 
+  },
+ 
+  refreshToken: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
+    default: undefined,
+    
   },
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  createdAt: {
-    type: Date,
-    default: null 
-  },
-  lastLogin: {
-    type: Date,
-    default: null
-  }
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("virex", Virexscheme);

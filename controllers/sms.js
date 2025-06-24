@@ -9,17 +9,36 @@ const lock = new AsyncLock();
 
 
 
-const get_rates = async (req, res) => {
-  const country = req.params.country
-  if (!country) return res.status(400).json({ "message": "country is need" });
-  try {
-    const response = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
 
-    return res.json(response.data)
-  } catch (error) {
-    console.error(error);
+const get_rates = async (req, res) => {
+  const country = req.query.country || req.params.country;
+
+  if (!country) {
+    return res.status(400).json({ message: "country is required" });
   }
-}
+
+  try {
+    const response = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
+    
+    return res.status(200).json(response.data);
+  } catch (error) {
+    console.error("Error fetching rates:", error.message);
+
+    if (error.response) {
+      return res.status(error.response.status).json({
+        message: error.response.data || "Error from external API",
+        status: error.response.status,
+      });
+    } else if (error.request) {
+      return res.status(502).json({ message: "No response from external server" });
+    } else {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+};
+
+
+
 
 
 

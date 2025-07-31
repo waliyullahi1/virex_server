@@ -28921,3 +28921,15 @@ cdb328dd-421c-42d6-8edb-4083b49c1441	 2025 Jun 024	008:13:43 	GET	 undefined	 /g
 f091165f-416a-4f3c-a329-fb39ce285b49	 2025 Jun 024	008:23:00 	GET	 undefined	 /.well-known/appspecific/com.chrome.devtools.json
 40623d1d-bd3e-4361-afcf-0e64ed755973	 2025 Jun 024	008:23:43 	GET	 undefined	 /getRates/apps/us
 d4cc8e18-f501-4e1c-988e-e186908f2a23	 2025 Jun 024	008:23:45 	GET	 undefined	 /.well-known/appspecific/com.chrome.devtools.json
+4425e0ef-ec6e-4e31-a367-8aa5eb0729cd	 2025 Jul 031	018:36:21 	GET	 undefined	 /
+7a91e040-f977-4f9d-9603-523cfc0f0f17	 2025 Jul 031	018:36:21 	GET	 undefined	 /css/style.css
+766b74f5-2672-4f12-a272-966346ca0e9c	 2025 Jul 031	018:36:21 	GET	 undefined	 /image/imag3.jpg
+1591f1e7-4d4a-4e83-8be9-f03ef54bf347	 2025 Jul 031	018:36:22 	GET	 undefined	 /favicon.ico
+9c926a71-4e39-4fd0-9412-80c916fe94de	 2025 Jul 031	018:37:30 	GET	 undefined	 /apps/usa
+0d622ad7-c010-4daa-bb8c-0ee9e948919b	 2025 Jul 031	018:37:35 	GET	 undefined	 /apps/us
+55cfd018-5a0f-4822-9e7f-72f412dc1e02	 2025 Jul 031	018:37:59 	GET	 undefined	 /getRates/apps/us
+0baedd79-612c-406e-b4ca-c59b9e2144b0	 2025 Jul 031	019:02:10 	GET	 undefined	 /getRates/apps/us
+894bccb6-50aa-4486-9f33-2f80560138d8	 2025 Jul 031	019:03:41 	GET	 undefined	 /getRates/apps/us
+fa67b48a-f813-4b88-921d-e793a3173837	 2025 Jul 031	019:04:32 	GET	 undefined	 /getRates/apps/us
+f2c41907-b872-4104-a758-0bb5e4f31240	 2025 Jul 031	019:05:03 	GET	 undefined	 /getRates/apps/us
+a556fc39-9674-4dd6-aea4-327b4ea41f78	 2025 Jul 031	020:14:47 	GET	 undefined	 /getRates/apps/us

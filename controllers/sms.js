@@ -14,22 +14,21 @@ const get_rates = async (req, res) => {
   const country = req.query.country || req.params.country;
 
   if (!country) {
-    return res.status(400).json({ message: "country is required" });
+    return res.status(400).json({ message: "Country is required" });
   }
 
   try {
+    const cloudscraper = require('cloudscraper');
 
+    // Use cloudscraper to bypass Cloudflare and get response as text
+    const response = await cloudscraper.get(`https://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
 
-    // const response = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
+    // Parse response into JSON (it’s a JSON string)
+    const data = JSON.parse(response);
 
-    const response = await axios.get(`http://pvacodes.com/user/api/get_rates.php`, {
-      params: {
-        customer: process.env.PVACODE, // Replace with your actual customer key
-        country: country,
-      },
-    });
+    // Send response to frontend
+    return res.status(200).json(data);
 
-    return res.status(200).json(response.data);
   } catch (error) {
     console.error("Error fetching rates:", error.message);
 

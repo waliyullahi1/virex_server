@@ -28936,3 +28936,7 @@ a556fc39-9674-4dd6-aea4-327b4ea41f78	 2025 Jul 031	020:14:47 	GET	 undefined	 /g
 b89cdc63-1138-44e1-9c35-69dde209d198	 2025 Jul 031	021:09:10 	GET	 undefined	 /getRates/apps/us
 74f54003-92cb-42b9-9649-5ee7ba59536b	 2025 Jul 031	021:09:14 	GET	 undefined	 /favicon.ico
 33ebcdb5-3575-42ae-8d8f-5c84502a047d	 2025 Jul 031	021:13:36 	GET	 undefined	 /candidate/applications
+c4ddaee2-daa3-480e-9912-e4d323063ec9	 2025 Aug 001	007:36:18 	GET	 undefined	 /getRates/apps/us
+8e245029-eb4f-4ffb-99b1-961598db5d7a	 2025 Aug 001	007:36:21 	GET	 undefined	 /favicon.ico
+5f8dc604-ef5d-4717-b93e-a69a621c2078	 2025 Aug 001	008:08:49 	GET	 undefined	 /getRates/apps/us
+3d88009b-040a-4f87-ad3f-d34937033fdc	 2025 Aug 001	008:10:20 	GET	 undefined	 /getRates/apps/us

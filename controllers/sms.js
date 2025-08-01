@@ -4,11 +4,12 @@ const axios = require('axios')
 const smsSaves = require('./savesms')
 const AsyncLock = require('async-lock');
 const jwt = require("jsonwebtoken");
-
+const cloudscraper = require('cloudscraper');
 const lock = new AsyncLock();
 
 
 
+// import axios from 'axios';
 
 const get_rates = async (req, res) => {
   const country = req.query.country || req.params.country;
@@ -18,32 +19,70 @@ const get_rates = async (req, res) => {
   }
 
   try {
-    const cloudscraper = require('cloudscraper');
+    const response = await axios.get(
+      `https://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`,
+      {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Referer': 'https://pvacodes.com/',
+        },
+        timeout: 10000,
+      }
+    );
 
-    // Use cloudscraper to bypass Cloudflare and get response as text
-    const response = await cloudscraper.get(`https://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
-
-    // Parse response into JSON (it’s a JSON string)
-    const data = JSON.parse(response);
-
-    // Send response to frontend
-    return res.status(200).json(data);
-
+    return res.status(200).json(response.data);
   } catch (error) {
-    console.error("Error fetching rates:", error.message);
+    console.error('Axios error:', error.message);
 
-    if (error.response) {
-      return res.status(error.response.status).json({
-        message: error.response.data || "Error from external API",
-        status: error.response.status,
-      });
-    } else if (error.request) {
-      return res.status(502).json({ message: "No response from external server" });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    const status = error.response?.status || 500;
+    const message = error.response?.data || "Failed to fetch data";
+
+    return res.status(status).json({
+      message: message,
+      error: error.message,
+    });
   }
 };
+
+
+
+// const get_rates = async (req, res) => {
+//   const country = req.query.country || req.params.country;
+
+//   if (!country) {
+//     return res.status(400).json({ message: "Country is required" });
+//   }
+
+//   try {
+
+
+//     // Use cloudscraper to bypass Cloudflare and get response as text
+//     const response = await cloudscraper.get(`https://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
+
+//     // Parse response into JSON (it’s a JSON string)
+//     const data = JSON.parse(response);
+
+//     // Send response to frontend
+//     return res.status(200).json(data);
+
+//   } catch (error) {
+//     console.error("Error fetching rates:", error.message);
+
+//     if (error.response) {
+//       return res.status(error.response.status).json({
+//         message: error.response.data || "Error from external API",
+//         status: error.response.status,
+//       });
+//     } else if (error.request) {
+//       return res.status(502).json({ message: "No response from external server" });
+//     } else {
+//       return res.status(500).json({ message: "Internal server error" });
+//     }
+//   }
+// };
 
 
 

@@ -4,7 +4,7 @@ const axios = require('axios')
 const smsSaves = require('./savesms')
 const AsyncLock = require('async-lock');
 const jwt = require("jsonwebtoken");
-
+const cloudscraper = require('cloudscraper');
 const lock = new AsyncLock();
 
 
@@ -64,8 +64,8 @@ const generateNumber = async (req, res) => {
 
         try {
 
-              const response1 = await axios.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
-          const apps = response1.data
+              const response1 = await cloudscraper.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
+          const apps =  JSON.parse(response1)
 
           const matchingApp = apps.find(element => element.app === app);
           console.log(matchingApp);

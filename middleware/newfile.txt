@@ -28940,3 +28940,7 @@ c4ddaee2-daa3-480e-9912-e4d323063ec9	 2025 Aug 001	007:36:18 	GET	 undefined	 /g
 8e245029-eb4f-4ffb-99b1-961598db5d7a	 2025 Aug 001	007:36:21 	GET	 undefined	 /favicon.ico
 5f8dc604-ef5d-4717-b93e-a69a621c2078	 2025 Aug 001	008:08:49 	GET	 undefined	 /getRates/apps/us
 3d88009b-040a-4f87-ad3f-d34937033fdc	 2025 Aug 001	008:10:20 	GET	 undefined	 /getRates/apps/us
+ddd78220-9871-4328-bb3b-2f3bfdc29bd2	 2025 Aug 006	010:20:42 	GET	 undefined	 /getRates/apps/us
+00ba38e7-6bd2-4acc-8372-37cc4494abd3	 2025 Aug 006	010:21:13 	GET	 undefined	 /getRates/apps/us
+b776b749-3f71-4951-9fd8-8d19c8f9aac5	 2025 Aug 006	010:24:48 	GET	 undefined	 /getRates/apps/us
+bbfdd7cb-81b2-43ee-bd4f-ef29cd3f99b4	 2025 Aug 006	010:24:58 	GET	 undefined	 /getRates/apps/usa

@@ -4,7 +4,7 @@ const axios = require('axios')
 const smsSaves = require('./savesms')
 const AsyncLock = require('async-lock');
 const jwt = require("jsonwebtoken");
-const cloudscraper = require('cloudscraper');
+
 const lock = new AsyncLock();
 
 
@@ -21,13 +21,10 @@ const get_rates = async (req, res) => {
 
 
     // Use cloudscraper to bypass Cloudflare and get response as text
-    const response = await cloudscraper.get(`https://pvacodes.com/user/api/get_rates.php?country=${encodeURIComponent(country)}`);
+    const response = await axios.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
 
-    // Parse response into JSON (it’s a JSON string)
-    const data = JSON.parse(response);
-
-    // Send response to frontend
-    return res.status(200).json(data);
+  
+      return res.status(200).json(response.data);
 
   } catch (error) {
     console.error("Error fetching rates:", error.message);
@@ -44,8 +41,6 @@ const get_rates = async (req, res) => {
     }
   }
 };
-
-
 
 
 
@@ -69,8 +64,7 @@ const generateNumber = async (req, res) => {
 
         try {
 
-
-          const response1 = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
+              const response1 = await axios.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
           const apps = response1.data
 
           const matchingApp = apps.find(element => element.app === app);

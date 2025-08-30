@@ -1,12 +1,98 @@
 const User = require("../model/Users");
-const smsSave = require('../model/sms')
-const axios = require('axios')
-const smsSaves = require('./savesms')
+const Sms = require('../model/sms');
+const axios = require('axios');
+const smsSaves = require('./savesms');
 const AsyncLock = require('async-lock');
 const jwt = require("jsonwebtoken");
-const cloudscraper = require('cloudscraper');
 const lock = new AsyncLock();
+const verifyNumber =require("../service/verify_Number") 
+const fs = require("fs");
+const path = require("path");
+const mime = require("mime-types");
 
+// 📌 uploads function (no UUID, just name)
+const uploads = (fileBuffer, originalName, customFolder = "general") => {
+  return new Promise((resolve, reject) => {
+    try {
+      const baseUploadPath = path.join(process.cwd(), "uploads", customFolder);
+
+      if (!fs.existsSync(baseUploadPath)) {
+        fs.mkdirSync(baseUploadPath, { recursive: true });
+      }
+
+      // ✅ Just use the original name (replace spaces with _)
+      const uniqueName = originalName.replace(/\s+/g, "_");
+      const fullPath = path.join(baseUploadPath, uniqueName);
+
+      fs.writeFile(fullPath, fileBuffer, (err) => {
+        if (err) return reject(err);
+
+        const relativePath = `/uploads/${customFolder}/${uniqueName}`.replace(/\\/g, "/");
+
+        const mimeType = mime.lookup(originalName);
+        const fileExtension = path.extname(originalName);
+
+        let fileType = "other";
+        if (mimeType?.startsWith("image/")) fileType = "image";
+        else if (mimeType?.startsWith("video/")) fileType = "video";
+        else if (mimeType === "application/pdf") fileType = "pdf";
+
+        resolve({
+          path: relativePath,
+          type: fileType,
+          extension: fileExtension || "",
+        });
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+// 📌 Download and save by full name
+async function downloadAndSave(url, fullName, customFolder = "countries") {
+  try {
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+
+    // Get extension from URL
+    const fileExtension = path.extname(url) || ".webp";
+
+    // File name = full name + extension
+    const safeName = fullName.replace(/\s+/g, "_");
+    const originalName = `${safeName}${fileExtension}`;
+
+    const savedFile = await uploads(response.data, originalName, customFolder);
+
+    console.log("✅ Saved:", savedFile.path);
+    return savedFile;
+  } catch (err) {
+    console.error("❌ Error downloading:", err.message);
+  }
+}
+
+// 📌 Controller function (CommonJS export)
+const getCountries = async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.pvapins.com/user/api/load_countries.php`);
+    const countries = response.data;
+
+
+    return res.status(200).json(countries);
+  } catch (error) {
+    console.error("Error fetching rates:", error.message);
+
+    if (error.response) {
+      return res.status(error.response.status).json({
+        message: error.response.data || "Error from external API",
+        status: error.response.status,
+      });
+    } else if (error.request) {
+      return res.status(502).json({ message: "No response from external server" });
+    } else {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  }
+};
 
 
 
@@ -21,10 +107,11 @@ const get_rates = async (req, res) => {
 
 
     // Use cloudscraper to bypass Cloudflare and get response as text
-    const response = await axios.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
 
-  
-      return res.status(200).json(response.data);
+    const response = await axios.get(`https://api.pvapins.com/user/api/load_apps.php?country_id=${country}`);
+
+    console.log(response.data);
+    return res.status(200).json(response.data);
 
   } catch (error) {
     console.error("Error fetching rates:", error.message);
@@ -44,11 +131,32 @@ const get_rates = async (req, res) => {
 
 
 
+const convertToNaira = async () => {
+  try {
+
+
+    // Example using ExchangeRate API (replace with your own API key)
+    const res = await axios.get(
+      "https://open.er-api.com/v6/latest/USD"  // free API for USD rates
+    );
+
+    // Get NGN conversion rate
+    const value = res.data.rates.NGN + 420;
+
+    // Convert amount
+
+    return value;
+
+  } catch (err) {
+    console.error("Error fetching rate:", err.message);
+  }
+}
+
 
 
 
 const generateNumber = async (req, res) => {
-  lock.acquire('transaction-lock', async (done) => {
+  lock.acquire('generateNumber_lock', async (done) => {
     try {
 
       const cookies = req.cookies;
@@ -58,43 +166,57 @@ const generateNumber = async (req, res) => {
 
       const foundUser = await User.findOne({ refreshToken }).exec();
       if (foundUser) {
-        const { country, app } = req.body;
-        if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
+        const { country, app, country_code } = req.body;
+        console.log(country, app, country_code);
+        if (!country || !app || !country_code) { return res.status(400).json({ message: "Country, app, and country_code are required." }); }
 
 
         try {
+          console.log('try to fetch app');
+          const response1 = await axios.get(`https://api.pvapins.com/user/api/load_apps.php?country_id=${country_code}`);
+          console.log(' fetch app finished');
+          const apps = response1.data
 
-              const response1 = await cloudscraper.get(`https://virexserver-2z3e.vercel.app/getRates/apps/${encodeURIComponent(country)}`);
-          const apps =  JSON.parse(response1)
-
-          const matchingApp = apps.find(element => element.app === app);
+          const matchingApp = apps.find(element => element.full_name === app);
           console.log(matchingApp);
 
-          if (Number(matchingApp.rate) * 400 < foundUser.walletBalance) {
-            console.log(Number(matchingApp.rate), Number(matchingApp.rate) * 400);
+          if (!matchingApp) return res.status(404).json({ message: "App not found" });
+          const usdToNgn = await convertToNaira();
+
+          const price = Number(matchingApp.deduct) * usdToNgn
+
+
+          if (price.toFixed(1) < foundUser.walletBalance) {
+
             try {
-              const response = await axios.get(`http://pvacodes.com/user/api/get_number.php`,
-                {
-                  params: {
-                    customer: process.env.PVACODE, // Replace with your actual customer key
-                    app: app,
-                    country: country,
-                  },
-                }
-              );
+              console.log('try to generate number');
+              //https://api.pvapins.com/user/api/get_number.php?customer=apikey&app=appname&country=countryname
+              const response = await axios.get(`https://api.pvapins.com/user/api/get_number.php?customer=${process.env.PVAPIN}&app=${app}&country=${country}`);
               const errors = ['App Not Found.', 'No free channels available check after sometime.', 'Not Enough balance', 'Customer Not Found.', 'New Numbers registration in progress, please wait or check back later.', 'Error 102, check back later.'];
-              console.log(response.data, 'error data');
-              console.log(response, 'error data');
+              console.log(response);
+              console.log(' generate number finished');
+              const expireTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
               if (errors.includes(response.data)) {
-
                 console.log(response.data, 'error is the matter');
                 res.status(200).json(response.data);
-              } else {
-                console.log('go');
+                } else {
+                  foundUser.walletBalance -= Number(price.toFixed(1));
+                  foundUser.save();
+                  const savesms = await Sms.create({
+                    email: foundUser.email,
+                    new_bal: foundUser.walletBalance,
+                  transactiondate: new Date(),
+                  expireAt: expireTime,
+                  Phone_Number: response.data,
+                  Country: country,
+                  App: matchingApp.full_name,
+                  Amount: price.toFixed(1),
+                  status: "ACTIVE"
+                });
 
-                const savenumber = await smsSaves(foundUser.email, response.data, matchingApp.rate, country, app)
-                console.log(savenumber);
+
+                console.log(savesms);
                 res.json('Number generate successful ')
               }
 
@@ -132,17 +254,19 @@ const generateNumber = async (req, res) => {
 
   // Acknowledge receipt
 }
+
+
+
 const showNumber = async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);
   const refreshToken = cookies.jwt;
 
-  const foundUser = await User.findOne({ refreshToken }).exec();
+  const foundUser = await User.findOne({ refreshToken }).sort({ createdAt: -1 }).exec();
   if (!foundUser) return res.status(402).json({ "message": 'user not found' })
   const email = foundUser.email;
-  console.log(email);
 
-  const sms = await smsSave.find({ email });
+  const sms = await Sms.find({ email }).sort({ transactiondate: -1 });
 
   res.json(sms);
 }
@@ -154,7 +278,7 @@ const showNumber = async (req, res) => {
 
 
 const otp = async (req, res) => {
-  lock.acquire('transaction-lock', async (done) => {
+  lock.acquire('otp-lock', async (done) => {
     try {
 
       const cookies = req.cookies;
@@ -163,100 +287,12 @@ const otp = async (req, res) => {
       const refreshToken = cookies.jwt;
       const foundUser = await User.findOne({ refreshToken }).exec();
       if (!foundUser) return res.sendStatus(403);  // Handle missing user
-
-      const { country, app, phoneNumber } = req.body;
-
-      const number_found = await smsSave.findOne({ Phone_Number: phoneNumber }).exec();
-      console.log(number_found);
-      console.log('Active', number_found.Activation_Code, `Status`, number_found.status)
-      if (!number_found) return res.status(404).json({ message: "Phone number not found" });
-      if (number_found.token == '' || number_found.status == 'active' && number_found.Activation_Code) {
-        number_found.status == 'expired';
-
-        await foundUser.save();
-        console.log('fffff')
-        return res.status(404).json({ message: "Phone number is expired" });
-      }
-
-
-      try {
-        const decoded = jwt.verify(number_found.token, process.env.ACCESS_TOKEN_SECRETY);
-
-        if (number_found.email !== decoded.UserInfo.email) {
-          console.log("Email in token does not match user record");
-          return res.status(403).json({ message: "Invalid email" });
-        }
-
-
-        console.log("Token is valid, proceeding to next middleware...");
-
-
-
-
-        if (number_found.Amount > foundUser.walletBalance) {
-          console.log('Insufficient balance');
-          return res.status(400).json({ message: "Insufficient balance, fund your wallet" });
-        }
-
-        if (!country || !app) {
-          return res.status(400).json({ message: "Country and app are required." });
-        }
-
-        try {
-          const response = await axios.get(`http://pvacodes.com/user/api/get_sms.php`, {
-            params: { customer: process.env.PVACODE, app, number: phoneNumber, country },
-          });
-
-          const errors = ['Customer Not Found.', 'Number Not Found.', 'You have not received any code yet.', 'Your balance is expired.', 'Error 102, check back later.'];
-
-          if (errors.includes(response.data)) {
-            console.log(response.data);
-            console.log('waliuu');
-
-            return res.status(400).json({ message: response.data });
-          }
-
-
-          foundUser.walletBalance -= number_found.Amount;
-          console.log(foundUser.walletBalance);
-          number_found.Activation_Code = response.data;
-          await foundUser.save();
-          console.log(foundUser.walletBalance);
-
-          number_found.status = 'expired';
-          number_found.token = ''
-          number_found.new_bal = foundUser.walletBalance
-
-          await number_found.save();
-          console.log(number_found);
-
-
-
-
-
-
-
-          return res.json({ message: "Successful" });
-
-        } catch (error) {
-          console.error(error);
-          return res.status(500).json({ message: "An unexpected error occurred." });
-        }
-
-      } catch (err) {
-        if (err instanceof jwt.TokenExpiredError) {
-          console.log("Token has expired");
-          number_found.status = 'expired';
-          await number_found.save();
-          return res.status(403).json({ message: "Token expired" });
-        } else {
-          console.log("Error verifying token:", err.message);
-          number_found.status = 'expired';
-          await number_found.save();
-          return res.status(403).json({ message: "Invalid token" });
-        }
-      }
-
+      console.log('try to verify number');
+      const {  Phone_Number } = req.params
+      console.log(Phone_Number);
+       const verify_Number = await verifyNumber(Phone_Number)
+         console.log(verify_Number, 'verify_Number verify number finished');
+        res.status(200).json({success:"number update successful"})
     } finally {
       done(); // Release the lock
     }
@@ -273,173 +309,8 @@ const otp = async (req, res) => {
 }
 
 
-// const otp = async (req, res) => {
-//   const cookies = req.cookies;
-//   if (!cookies?.jwt) return res.sendStatus(401);
-//   const refreshToken = cookies.jwt;
-//   const foundUser = await User.findOne({ refreshToken }).exec();
-//   if (foundUser) {
-//     const { country, app, phoneNumber } = req.body;
-
-
-//     const number_found = await smsSave.findOne({ Phone_Number: phoneNumber }).exec();
-
-//     try {
-//       const decoded = jwt.verify(number_found.token, process.env.ACCESS_TOKEN_SECRETY);
-//       console.log(decoded.UserInfo.email, number_found.email);
-
-//       if (!number_found || number_found.email !== decoded.UserInfo.email) {
-//         console.log("Email in token does not match user record");
-//         return res.status(403).json({ message: "Invalid email" });
-//       }
-
-//       console.log("Token is valid, proceeding to next middleware...");
-
-//       try {
-
-//         const response1 = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
-//         const apps = response1.data
-
-//         const matchingApp = apps.find(element => element.app === app);
-//         console.log(matchingApp, 'ddddd');
-
-//         if (Number(matchingApp.rate) * 400 < foundUser.walletBalance) {
-
-//           if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
-//           try {
-//             const response = await axios.get(`http://pvacodes.com/user/api/get_sms.php`,
-//               {
-//                 params: {
-//                   customer: process.env.PVACODE,
-//                   app: app,
-//                   number: phoneNumber,
-//                   country: country,
-
-//                 },
-//               }
-//             );
-//             const errors = ['Customer Not Found.', 'Number Not Found.', 'You have not received any code yet.', 'Customer Not Found.', 'Your balance is expired.', 'Error 102, check back later.'];
-
-//             if (errors.includes(response.data)) {
-
-//               console.log(response.data);
-//               res.json('An error occurred while generating number try it again');
-//             } else {
-
-//               const smsFound = await smsSave.findOne({ phoneNumber }).exec()
-//               smsFound.Activation_Code = response.data;
-//               foundUser.walletBalance -= Number(matchingApp.rate) * 400
-//               await smsFound.save()
-
-//               res.json('successful')
-
-
-//             }
-
-
-
-//             // Save the updated document
-
-
-//           } catch (error) {
-//             console.error(error);
-//             return res.status(500).json({ message: "An unexpected error occurred." });
-//           }
-
-//         } else {
-//           console.log('insufficent ');
-//           res.status(500).json({ "message": " insufficent balance , fund your wallet " });
-//         }
-
-//       } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({ message: "An unexpected error occurred." });
-//       }
-
-//       return res.status(200).json({ message: "number as notexpired" })
-//       // Attach user info for later use
-
-//     } catch (err) {
-//       if (err instanceof jwt.TokenExpiredError) {
-//         console.log("Token has expired");
-//         number_found.status = 'expired';
-//         number_found.save()
-//         console.log(number_found);
-
-//         return res.status(403).json({ message: "Token expired" });
-//       } else {
-//         console.log("Error verifying token:", err.message);
-//         return res.status(403).json({ message: "Invalid token" });
-//       }
-//     }
-//     // try {
-
-//     //   console.log(phoneNumber, country,app,'ddddd');
-//     //   const response1 = await axios.get(`http://pvacodes.com/user/api/get_rates.php?country=${country}`);
-//     //   const apps = response1.data
-
-//     //   const matchingApp = apps.find(element => element.app === app);
-//     //   console.log(matchingApp, 'ddddd');
-
-//     //   if (Number(matchingApp.rate) * 400 < foundUser.walletBalance) {
-
-//     //     if (!country || !app) { return res.status(400).json({ message: "Country and app are required." }); }
-//     //     try {
-//     //       const response = await axios.get(`http://pvacodes.com/user/api/get_sms.php`,
-//     //         {
-//     //           params: {
-//     //             customer: process.env.PVACODE,
-//     //             app: app,
-//     //             number: phoneNumber,
-//     //             country: country,
-
-//     //           },
-//     //         }
-//     //       );
-//     //       const errors = ['Customer Not Found.', 'Number Not Found.', 'You have not received any code yet.', 'Customer Not Found.', 'Your balance is expired.', 'Error 102, check back later.'];
-
-//     //       if (errors.includes(response.data)) {
-
-//     //         console.log(response.data);
-//     //         res.json('An error occurred while generating number try it again');
-//     //       } else {
-
-//     //         const smsFound = await smsSave.findOne({ phoneNumber }).exec()
-//     //         console.log(smsFound);
-//     //         smsFound.Activation_Code = response.data;
-//     //         foundUser.walletBalance -= Number(matchingApp.rate) * 400
-//     //           await smsFound.save()
-
-//     //         res.json('successful')
-
-
-//     //       }
-
-
-
-//     //       // Save the updated document
-
-
-//     //     } catch (error) {
-//     //       console.error(error);
-//     //       return res.status(500).json({ message: "An unexpected error occurred." });
-//     //     }
-
-//     //   } else {
-//     //     console.log('insufficent ');
-//     //     res.status(500).json({ "message": " insufficent balance , fund your wallet " });
-//     //   }
-
-//     // } catch (error) {
-//     //   console.error(error);
-//     //   return res.status(500).json({ message: "An unexpected error occurred." });
-//     // } 
-//   }
-
-
-// };
 
 
 
 
-module.exports = { get_rates, generateNumber, showNumber, otp };
+module.exports = { get_rates, getCountries, generateNumber, showNumber, otp };

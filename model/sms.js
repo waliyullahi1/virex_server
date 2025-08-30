@@ -5,29 +5,28 @@ const SmsSchema = new Schema({
   email: {
     type: String,
     required: true
-    },
-  
-    Activation_Code:{
+  },
+  Activation_Code: {
     type: String,
   },
- 
   transactiondate: {
+    type: Date,  // better to use Date instead of string
+    required: true,
+    default: Date.now
+  },
+  expireAt: {
+    type: Date,
+    required: true
+  },
+  Phone_Number: {
     type: String,
     required: true
   },
-
-
-  Phone_Number:{
+  Country: {
     type: String,
     required: true
   },
-
-  Country:{
-    type: String,
-    required: true
-  },
-
-  App:{
+  App: {
     type: String,
     required: true
   },
@@ -35,21 +34,18 @@ const SmsSchema = new Schema({
     type: Number,
     required: true
   },
-
-  status: {
-    type: String,
-   default: "No Used"
-  },
-  token:  String,
-  
+  token: String,
   new_bal: {
     type: Number
   },
   status: { 
     type: String, 
-    enum: ["active", "expired"], 
-    default: "active" 
+    enum: ["ACTIVE", "EXPIRED", "REJECTED", "USED"], 
+    default: "ACTIVE" 
   },
 });
 
-module.exports = mongoose.model('sms', SmsSchema );
+// Index expireAt to make queries faster
+SmsSchema.index({ expireAt: 1 });
+
+module.exports = mongoose.model('Sms', SmsSchema);

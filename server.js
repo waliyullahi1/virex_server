@@ -13,7 +13,8 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const credentials = require("./middleware/credentials");
-
+const  cron = require("node-cron");
+const { checkNumbers } = require("./controllers/checkNumbers");
 connectDB();
 
 
@@ -54,11 +55,15 @@ app.use("/fund", require("./route/api/fund"));
 app.use("/resetpassword", require("./route/resetpassword"));
 app.use("/veryfyJWT", require("./middleware/verifyJWT"));
 app.use("/valid", require("./controllers/verify"));
-app.use("/getRates", require("./route/sms"));
+app.use("/", require("./route/sms"));
 app.use('/ping', require("./route/ping"));
 app.use('/notices', require("./route/notices"));
  
 
+// cron.schedule("* * * * *", async () => {
+//   await checkNumbers();
+//   console.log("Checked numbers for expiration");
+// });
 
 app.get(
   "/red(.html)?",

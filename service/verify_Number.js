@@ -7,7 +7,7 @@ const verifyNumber = async (Phone_Number) => {
 
     
   const now = new Date();
-  console.log(Phone_Number);
+
   
   // fetch number record
   const activeNumber = await Sms.findOne({ Phone_Number, status: "ACTIVE" });

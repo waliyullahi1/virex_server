@@ -60,10 +60,10 @@ app.use('/ping', require("./route/ping"));
 app.use('/notices', require("./route/notices"));
  
 
-// cron.schedule("* * * * *", async () => {
-//   await checkNumbers();
-//   console.log("Checked numbers for expiration");
-// });
+cron.schedule("* * * * *", async () => {
+  await checkNumbers();
+  console.log("Checked numbers for expiration");
+});
 
 app.get(
   "/red(.html)?",

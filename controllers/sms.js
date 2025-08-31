@@ -110,7 +110,7 @@ const get_rates = async (req, res) => {
 
     const response = await axios.get(`https://api.pvapins.com/user/api/load_apps.php?country_id=${country}`);
 
-    console.log(response.data);
+   
     return res.status(200).json(response.data);
 
   } catch (error) {
@@ -178,7 +178,9 @@ const generateNumber = async (req, res) => {
           const apps = response1.data
 
           const matchingApp = apps.find(element => element.full_name === app);
-          console.log(matchingApp);
+        
+
+          
 
           if (!matchingApp) return res.status(404).json({ message: "App not found" });
           const usdToNgn = await convertToNaira();
@@ -216,7 +218,7 @@ const generateNumber = async (req, res) => {
                 });
 
 
-                console.log(savesms);
+            
                 res.json('Number generate successful ')
               }
 

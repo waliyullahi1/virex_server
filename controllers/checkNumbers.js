@@ -87,7 +87,7 @@ const rejectNumber = async (req, res) => {
           await user.save();
         }
         await num.save();
-        return res.status(400).json({ message: response.data });
+        return res.status(200).json({ message: response.data });
 
       }
 

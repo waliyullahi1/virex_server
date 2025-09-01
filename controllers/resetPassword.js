@@ -30,6 +30,7 @@ const requestPasswordReset = async (req, res) => {
     await foundUser.save();
 const first_name = foundUser.full_name?.trim().split(" ")[1] || "";
     notices(foundUser.email, forgetPasswordTemplate(randomPassword, first_name, 'https://www.virex.codes/login') , 'Forget Password - Virex.com')
+    res.status(200).json({success:" check your email for new passoword"})
   } catch (error) {
     console.error('Error resetting password:', error);
     return res.status(500).json({ message: 'Internal server error' });

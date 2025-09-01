@@ -4,7 +4,8 @@ const Virexscheme = require('../model/Users');
 const jwt = require('jsonwebtoken');
 
 const bcrypt = require('bcryptjs');
-
+const notices = require("./emailSms")
+const forgetPasswordTemplate = require("../template/forgetingtemplate")
 
 
 
@@ -27,31 +28,8 @@ const requestPasswordReset = async (req, res) => {
    
     foundUser.password = hashedPassword;
     await foundUser.save();
-
-
-    let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'waliuwaheed2021@gmail.com',
-        pass: process.env.EMAIL_PASSkEY,
-      }
-    });
-
-    let mailOptions = {
-      from: '"Virex" <waliuwaheed2021@gmail.com>',
-      to: email,
-      subject: 'Forget Password - Virex.com',
-      text: `Dear ${foundUser.email},\nYour new password: ${randomPassword}\nThanks`,
-    };
-    
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ message: 'Error sending email' });
-      }
-      return res.status(200).json({ sucess: " A new password has sent to your email. " });
-    });
+const first_name = foundUser.full_name?.trim().split(" ")[1] || "";
+    notices(foundUser.email, forgetPasswordTemplate(randomPassword, first_name, 'https://www.virex.codes/login') , 'Forget Password - Virex.com')
   } catch (error) {
     console.error('Error resetting password:', error);
     return res.status(500).json({ message: 'Internal server error' });

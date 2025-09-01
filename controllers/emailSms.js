@@ -1,29 +1,32 @@
+const { text } = require('express');
 const nodemailer = require('nodemailer');
 
 
 
 
-const notices = async (email, message) => {
-  let pinHtml = ` ${message}`
-  let transporter = nodemailer.createTransport({
-    service: 'gmail',
+const notices = async (email, message, subject) => {
+  
+
+    const transporter = nodemailer.createTransport({
+    host: process.env.HOSTEDEMAIL,
+    port: process.env.PORTEMAIL,
+    secure: false, // true for 465, false for 587
     auth: {
-      user: 'waliuwaheed2021@gmail.com', 
-      pass: process.env.EMAIL_PASSkEY
+      user: process.env.USEREMAIL,
+      pass:  process.env.PASSEMAIL 
+  
     }
   });
-
-  let mailOptions = {
-    from: '"no-reply"info@abaniseedu.com', 
-    to: email, 
-    subject: 'Notices', 
-   
-    html: pinHtml
-   };
-
   try {
-    let info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: ' + info.response);
+  await transporter.sendMail({
+    from: "support@virex.codes",
+    to:email,
+    subject: subject,
+   html: message
+  });
+
+  
+  
 } catch (error) {
     console.log('Error: ', error);
 }

@@ -4,14 +4,20 @@ const User = require("../model/Users");
 const verifyNumber =require("../service/verify_Number") 
 const AsyncLock = require('async-lock');
 const lock = new AsyncLock();
+const Found = require('../model/fund'); 
+
 
 const checkNumbers = async () => {
   const now = new Date();
+ 
 
   // fetch all active numbers
   const activeNumbers = await Sms.find({ status: "ACTIVE" });
   console.log("Active numbers found:", activeNumbers.length);
-
+  if (activeNumbers.length === 0) {
+    console.log("No active numbers to check.");
+    return;
+  }
   // Run all requests in parallel
   await Promise.all(
     activeNumbers.map(async (num) => {
@@ -57,8 +63,10 @@ const checkNumbers = async () => {
   
 
   const issuesNumber = await Sms.find({ status: "USED", Activation_Code: null });
-console.log(issuesNumber);
-
+  if (issuesNumber.length === 0) {
+    console.log("No issues numbers to check.");
+    return;
+  }
 
 await Promise.all(
   issuesNumber.map(async (num) => {

@@ -57,7 +57,7 @@ const verifyNumber = async (Phone_Number) => {
     } else {
       console.log('Verification successful for number:', activeNumber);
       // success branch → store activation code if provided
-      activeNumber.Activation_Code = smsResponse.data?.code || null;
+      activeNumber.Activation_Code = smsResponse.data;
       activeNumber.status = "USED";
     }
 

@@ -54,8 +54,39 @@ const checkNumbers = async () => {
       }
     })
   );
+  
 
-  return await Sms.find();
+  const issuesNumber = await Sms.find({ status: "USED", Activation_Code: null });
+console.log(issuesNumber);
+
+
+await Promise.all(
+  issuesNumber.map(async (num) => {
+    try {
+      const response = await axios.get(
+        `https://api.pvapins.com/user/api/get_history.php?customer=${process.env.PVAPIN}`
+      );
+
+      console.log(response.data);
+
+      // find number in API response
+      const findNumber = Array.isArray(response.data)
+        ? response.data.find((a) => a.number === num.Phone_Number)
+        : null;
+
+      // use either matched record or raw response
+        num.Activation_Code = findNumber.message
+      console.log(findNumber.message);
+      
+
+      await num.save();
+    } catch (err) {
+      console.error("Error checking number", num.Phone_Number, err.message);
+    }
+  })
+);
+
+
 };
 
 

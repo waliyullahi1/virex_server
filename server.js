@@ -16,6 +16,7 @@ const connectDB = require("./config/db");
 const credentials = require("./middleware/credentials");
 const  cron = require("node-cron");
 const { checkNumbers } = require("./controllers/checkNumbers");
+const { auto_valid_transaction } = require('./controllers/fund')
 const sendsorrymessage = require("./controllers/sendmessage")
 connectDB();
 
@@ -62,6 +63,7 @@ app.use('/notices', require("./route/notices"));
  
 
 cron.schedule("* * * * *", async () => {
+//  await auto_valid_transaction();
   await checkNumbers();
   console.log("Checked numbers for expiration");
 });

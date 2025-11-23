@@ -21,6 +21,7 @@ const checkNumbers = async () => {
           const smsResponse = await axios.get(
             `https://api.pvapins.com/user/api/get_sms.php?customer=${process.env.PVAPIN}&number=${num.Phone_Number}&country=${num.Country}&app=${num.App}`
           );
+           console.log("status", smsResponse.status);
 
           // extract status string (handle both object + plain string)
           const statusMsg = smsResponse.data?.status || smsResponse.data || "";
@@ -35,15 +36,18 @@ const checkNumbers = async () => {
           ];
 
           if (errors.some((e) => normalizedMsg.includes(e.toLowerCase())) || !smsResponse.data) {
+             
             if (num.expireAt < now) {
               // refund user
               const user = await User.findOne({ email: num.email });
+              console.log("number expired", user)
               if (user) {
                 user.walletBalance += num.Amount;
                 await user.save();
               }
               num.status = "REJECTED";
             }
+             console.log("number as noyt  expired", )
           } else {
             // store activation code if provided
             num.Activation_Code = smsResponse.data;
@@ -54,9 +58,22 @@ const checkNumbers = async () => {
         } catch (err) {
           console.error("Error checking number", num.Phone_Number, err.message);
           if (err.message.includes('500')) {
+
             console.error("Server error 500 encountered for number", num.Phone_Number);
-            num.status = "REJECTED";
-            await num.save();
+            console.error("unknow error okay do something", err)
+            if (num.expireAt < now) {
+              // refund user
+              const user = await User.findOne({ email: num.email });
+              console.log("number expired", user)
+              if (user) {
+                user.walletBalance += num.Amount;
+                await user.save();
+              }
+              num.status = "REJECTED";
+
+              await num.save();
+            }
+          
           }
         }
       })
